@@ -1,0 +1,42 @@
+/* 全局样式 */
+page {
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif;
+  height: 100%;
+  width: 100%;
+}
+
+/* 按钮通用样式 */
+button {
+  border-radius: 8rpx;
+  font-size: 28rpx;
+}
+
+button::after {
+  border: none;
+}
+
+/* 输入框通用样式 */
+input {
+  font-size: 28rpx;
+  color: #333;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+
+/* 工具类 */
+.text-center { text-align: center; }
+.flex { display: flex; }
+.flex-column { flex-direction: column; }
+.align-center { align-items: center; }
+.justify-center { justify-content: center; }
+.flex-1 { flex: 1; }
+.mt-10 { margin-top: 10rpx; }
+.mb-10 { margin-bottom: 10rpx; }
+.ml-10 { margin-left: 10rpx; }
+.mr-10 { margin-right: 10rpx; }

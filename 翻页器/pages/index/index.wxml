@@ -1,0 +1,344 @@
+<view class="container">
+  <!-- 顶部区域 -->
+  <view class="header-container">
+    <view class="header-left">
+      <view class="close-button" bindtap="handleClose">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+    
+    <view class="header-center">
+      <text class="main-title">NO.45 人工智能"+"特辑 | 抢滩产业发展</text>
+      <text class="website">book.yunzhan365.com</text>
+    </view>
+    
+    <view class="header-right">
+      <view class="more-button" bindtap="toggleTopMenu">
+        <text class="more-icon">⋯</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 顶部菜单 -->
+  <view 
+    class="menu-mask" 
+    wx:if="{{showTopMenu}}" 
+    bindtap="closeTopMenu"
+  >
+    <view class="dropdown-menu" catchtap="stopPropagation">
+      <view class="menu-header">
+        <text class="menu-title">功能菜单</text>
+        <view class="menu-close-btn" bindtap="closeTopMenu">
+          <text class="close-btn-icon">×</text>
+        </view>
+      </view>
+      
+      <view class="menu-items">
+        <view class="menu-item" bindtap="handleTextEdit">
+          <view class="item-icon-box">
+            <text class="item-icon">A</text>
+          </view>
+          <view class="item-content">
+            <text class="item-title">文字编辑</text>
+          </view>
+        </view>
+        
+        <view class="menu-item" bindtap="handleSearchFunc">
+          <view class="item-icon-box">
+            <text class="item-icon">🔍</text>
+          </view>
+          <view class="item-content">
+            <text class="item-title">搜索功能</text>
+          </view>
+        </view>
+        
+        <view class="menu-item" bindtap="handleSettings">
+          <view class="item-icon-box">
+            <text class="item-icon">⚙️</text>
+          </view>
+          <view class="item-content">
+            <text class="item-title">阅读设置</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主内容区域 -->
+  <view class="main-content-area">
+    <!-- 内容展示区 -->
+    <view 
+      class="simple-display-area {{isAnimating ? 'swipe-' + swipeDirection : ''}}"
+      bindtouchstart="onTouchStart"
+      bindtouchmove="onTouchMove"
+      bindtouchend="onTouchEnd"
+      catchtap="stopPropagation"
+      style="transform: scale({{contentScale / 100}}); transform-origin: center center;"
+    >
+      <view class="display-content">
+        <image 
+          class="book-image" 
+          src="{{currentPageImage || 'https://via.placeholder.com/600x800/667eea/ffffff?text=Page+' + currentPage}}" 
+          mode="aspectFit"
+          bindload="onImageLoad"
+          binderror="onImageError"
+        />
+        
+        <!-- 页面指示器 -->
+        <view class="page-indicator">
+          <text class="page-number">{{currentPage}} / {{totalPages}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 原始缩略图区域 -->
+    <view class="thumbnail-section" wx:if="{{showThumbnails}}">
+      <scroll-view 
+        class="thumbnail-scroll-view" 
+        scroll-x 
+        scroll-with-animation
+        scroll-left="{{thumbnailScrollLeft}}"
+      >
+        <view class="thumbnails-wrapper">
+          <block wx:for="{{thumbnails}}" wx:key="index">
+            <view class="thumbnail-item {{item.active ? 'active' : ''}} {{item.zoomed ? 'zoomed' : ''}}" 
+              bindtap="onThumbnailTap" 
+              data-index="{{index}}"
+              data-page="{{item.page}}"
+            >
+              <view class="thumbnail-box">
+                <image class="thumbnail-image" src="{{item.image}}" mode="aspectFit" binderror="onThumbnailImageError" />
+                <text class="thumbnail-page">{{item.page}}</text>
+              </view>
+            </view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 底部功能栏 -->
+  <view class="combined-controls-bar">
+    <!-- 跳转功能 -->
+    <view class="jump-control-item">
+      <view class="jump-box">
+        <text class="jump-label">跳转</text>
+        <input 
+          class="jump-input" 
+          type="number" 
+          value="{{jumpPage}}"
+          placeholder="{{currentPage}}"
+          bindinput="onJumpInput"
+          max="{{totalPages}}"
+          min="1"
+        />
+        <text class="slash">/</text>
+        <text class="total-label">{{totalPages}}</text>
+        <view class="jump-btn" bindtap="doJump">GO</view>
+      </view>
+    </view>
+    
+    <!-- 缩略图按钮 -->
+    <view class="control-item" bindtap="toggleThumbnails">
+      <view class="control-icon thumb-toggle {{showThumbnails ? 'active' : ''}}">
+        <text class="control-icon-text">▤</text>
+      </view>
+      <text class="control-label">缩略图</text>
+    </view>
+    
+    <!-- 缩放按钮 -->
+    <view class="control-item" bindtap="toggleZoom">
+      <view class="control-icon smart-zoom {{isZoomMode ? 'zoomed' : ''}}">
+        <text class="control-icon-text">{{isZoomMode ? '−' : '+'}}</text>
+      </view>
+      <text class="control-label">{{contentScale}}%</text>
+    </view>
+    
+    <!-- 上传按钮 -->
+    <view class="control-item" bindtap="showUploadMenu">
+      <view class="control-icon upload-btn">
+        <text class="control-icon-text">📤</text>
+      </view>
+      <text class="control-label">上传</text>
+    </view>
+    
+    <!-- 功能按钮 -->
+    <view class="control-item" bindtap="toggleCircleMenu">
+      <view class="control-icon menu-btn">
+        <view class="menu-dots">
+          <view class="menu-dot"></view>
+          <view class="menu-dot"></view>
+          <view class="menu-dot"></view>
+        </view>
+      </view>
+      <text class="control-label">功能</text>
+    </view>
+  </view>
+
+  <!-- 文件上传菜单 -->
+  <view class="upload-menu-overlay" wx:if="{{showUploadMenu}}" bindtap="closeUploadMenu">
+    <view class="upload-menu-content" catchtap="stopPropagation">
+      <view class="upload-header">
+        <text class="upload-title">上传文件</text>
+        <view class="upload-close" bindtap="closeUploadMenu">
+          <text class="upload-close-icon">×</text>
+        </view>
+      </view>
+      
+      <view class="upload-types">
+        <view class="type-grid">
+          <view class="type-item" bindtap="uploadFile" data-type="pdf">
+            <view class="type-icon pdf-icon">
+              <text class="type-icon-text">📕</text>
+            </view>
+            <text class="type-name">PDF</text>
+          </view>
+          
+          <view class="type-item" bindtap="uploadFile" data-type="word">
+            <view class="type-icon word-icon">
+              <text class="type-icon-text">📘</text>
+            </view>
+            <text class="type-name">Word</text>
+          </view>
+          
+          <view class="type-item" bindtap="uploadFile" data-type="excel">
+            <view class="type-icon excel-icon">
+              <text class="type-icon-text">📗</text>
+            </view>
+            <text class="type-name">Excel</text>
+          </view>
+          
+          <view class="type-item" bindtap="uploadFile" data-type="ppt">
+            <view class="type-icon ppt-icon">
+              <text class="type-icon-text">📙</text>
+            </view>
+            <text class="type-name">PPT</text>
+          </view>
+          
+          <view class="type-item" bindtap="uploadFile" data-type="image">
+            <view class="type-icon image-icon">
+              <text class="type-icon-text">🖼️</text>
+            </view>
+            <text class="type-name">图片</text>
+          </view>
+          
+          <view class="type-item" bindtap="uploadFile" data-type="txt">
+            <view class="type-icon txt-icon">
+              <text class="type-icon-text">📄</text>
+            </view>
+            <text class="type-name">文本</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="upload-hint">
+        <text>支持格式：PDF, DOC, DOCX, XLS, XLSX, PPT, JPG, PNG, TXT</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 圆圈功能菜单 -->
+  <view 
+    class="circle-menu-overlay" 
+    wx:if="{{showCircleMenu}}" 
+    bindtap="closeCircleMenu"
+  >
+    <view class="circle-menu-content" catchtap="stopPropagation">
+      <view class="circle-menu-header">
+        <text class="circle-menu-title">功能设置</text>
+        <view class="circle-close-btn" bindtap="closeCircleMenu">
+          <text class="circle-close-icon">×</text>
+        </view>
+      </view>
+      
+      <scroll-view class="circle-menu-scroll" scroll-y>
+        <view class="menu-section">
+          <view class="section-title">📁 文件管理</view>
+          <view class="menu-row" bindtap="uploadFile" data-type="all">
+            <view class="row-icon">📤</view>
+            <text class="row-text">上传文件</text>
+            <text class="row-arrow">›</text>
+          </view>
+          <view class="menu-row" bindtap="openFileManager">
+            <view class="row-icon">📂</view>
+            <text class="row-text">文件管理</text>
+            <text class="row-arrow">›</text>
+          </view>
+          <view class="menu-row" bindtap="showRecentFiles">
+            <view class="row-icon">🕐</view>
+            <text class="row-text">最近文件</text>
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+        
+        <view class="menu-section">
+          <view class="section-title">📚 书籍链接</view>
+          <view class="menu-row" bindtap="sharePoster">
+            <view class="row-icon">🖼️</view>
+            <text class="row-text">分享海报</text>
+          </view>
+          <view class="menu-row" bindtap="shareQRCode">
+            <view class="row-icon">📱</view>
+            <text class="row-text">二维码</text>
+          </view>
+          <view class="menu-row" bindtap="shareMore">
+            <view class="row-icon">↗️</view>
+            <text class="row-text">更多分享</text>
+          </view>
+        </view>
+        
+        <view class="menu-section">
+          <view class="section-title">⚙️ 阅读设置</view>
+          <view class="switch-row">
+            <view class="switch-left">
+              <view class="switch-icon">📄</view>
+              <text class="switch-label">自动翻页</text>
+            </view>
+            <switch checked="{{autoFlip}}" bindchange="toggleAutoFlip" />
+          </view>
+          <view class="switch-row">
+            <view class="switch-left">
+              <view class="switch-icon">🔊</view>
+              <text class="switch-label">翻页音效</text>
+            </view>
+            <switch checked="{{soundOn}}" bindchange="toggleSound" />
+          </view>
+        </view>
+        
+        <view class="menu-section">
+          <view class="section-title">✨ 扩展功能</view>
+          <view class="menu-row" bindtap="simulateBookFlip">
+            <view class="row-icon">📖</view>
+            <text class="row-text">模拟翻页</text>
+          </view>
+          <view class="menu-row" bindtap="showPeerDrawing">
+            <view class="row-icon">👥</view>
+            <text class="row-text">同学画</text>
+          </view>
+          <view class="menu-row" bindtap="showCatalog">
+            <view class="row-icon">📚</view>
+            <text class="row-text">目录</text>
+          </view>
+          <view class="menu-row" bindtap="showAuthor">
+            <view class="row-icon">👤</view>
+            <text class="row-text">书籍作者</text>
+          </view>
+        </view>
+        
+        <view class="menu-section">
+          <view class="section-title">ℹ️ 关于</view>
+          <view class="menu-row" bindtap="showHelp">
+            <view class="row-icon">❓</view>
+            <text class="row-text">使用帮助</text>
+            <text class="row-arrow">›</text>
+          </view>
+          <view class="menu-row" bindtap="showVersion">
+            <view class="row-icon">ℹ️</view>
+            <text class="row-text">版本信息</text>
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>
